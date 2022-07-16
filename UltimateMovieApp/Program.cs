@@ -1,7 +1,9 @@
+using Constracts;
 using Contracts;
 using Entities;
 using LoggerService;
 using Microsoft.EntityFrameworkCore;
+using Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,9 +26,9 @@ builder.Services.AddDbContext<RepositoryContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection"));
 });
 
-
 builder.Services.AddScoped<ILoggerManager, LoggerManager>();
 
+builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 
 
 var app = builder.Build();
