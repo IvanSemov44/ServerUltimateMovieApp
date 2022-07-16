@@ -30,6 +30,7 @@ builder.Services.AddScoped<ILoggerManager, LoggerManager>();
 
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 
