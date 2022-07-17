@@ -22,7 +22,7 @@ namespace Entities.Models
         public string Address { get; set; } = string.Empty;
 
         public string Country { get; set; } = string.Empty;
-
+    
         public ICollection<Employee> Employees { get; set; } = new List<Employee>();
     }
 }

@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Entities.DataTransferObjects;
 using Entities.Models;
-using Microsoft.AspNetCore.Mvc;
 
 namespace UltimateMovieApp.AutoMapper
 {
@@ -12,6 +11,10 @@ namespace UltimateMovieApp.AutoMapper
             CreateMap<Company, CompaniesDto>()
                 .ForMember(c => c.FullAddress,
                 opt => opt.MapFrom(x => string.Join(' ', x.Address, x.Country)));
+
+            CreateMap<Employee, EmployeeDto>();
+
+            CreateMap<CompanyForCreationDto, Company>();
         }
     }
 }

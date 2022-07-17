@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Constracts;
 using Entities.DataTransferObjects;
+using Entities.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -21,7 +22,6 @@ namespace UltimateMovieApp.Controllers
             this._mapper = mapper;
         }
 
-        [HttpGet]
         public IActionResult GetCompanies()
         {
 
@@ -31,13 +31,44 @@ namespace UltimateMovieApp.Controllers
 
             _loggerManager.LogInformation("Hello from CompContr");
 
-            throw new Exception("Exception");
 
             return Ok(companiesDto);
+        }
 
-          //  _loggerManager.LogError($"Something went wrong in the {nameof(GetCompanies)} action{ex}");
-          //  return StatusCode(500, "Internal server error");
+        [HttpGet("{id}", Name = "companyById")]
+        public IActionResult GetCompany(Guid id)
+        {
+            var company = _repositoryManager.Company.GetCompany(id, trackChange: false);
 
+            if (company == null)
+            {
+                _loggerManager.LogInformation($"Company with id:{id} doesn't exist in the database");
+                return NotFound();
+            }
+            else
+            {
+                var companyDto = _mapper.Map<CompaniesDto>(company);
+                return Ok(companyDto);
+            }
+        }
+
+        [HttpPost]
+        public IActionResult CreateCompany([FromBody] CompanyForCreationDto company)
+        {
+            if (company==null)
+            {
+                _loggerManager.LogInformation("CompanyForCreationDto object send from client is null");
+                return BadRequest("CompanyForCreationDto object is null");
+            }
+
+            var companyEntity = _mapper.Map<Company>(company);
+
+            _repositoryManager.Company.CreateCreate(companyEntity);
+            _repositoryManager.Save();
+
+            var companyToReturn = _mapper.Map<CompaniesDto>(companyEntity);
+
+            return CreatedAtRoute("CompanyById", new { id = companyToReturn.Id }, companyToReturn);
         }
     }
 }

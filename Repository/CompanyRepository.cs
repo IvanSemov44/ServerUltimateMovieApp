@@ -21,5 +21,11 @@ namespace Repository
             => FindAll(trackChanges)
             .OrderBy(c => c.Name)
             .ToList();
+
+        public Company? GetCompany(Guid companyId, bool trackChange) 
+            => FindByConition(c => c.Id.Equals(companyId), trackChange)
+                    .SingleOrDefault();
+
+        public void CreateCreate(Company company) => Create(company);
     }
 }
