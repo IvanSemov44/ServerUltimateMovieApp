@@ -1,57 +1,95 @@
 using Constracts;
 using Contracts;
 using Entities;
-using LoggerService;
+using Entities.ErrorModel;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Repository;
+using System.Net;
+using NLog;
+using NLog.Web;
 
-var builder = WebApplication.CreateBuilder(args);
+var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
-// Add services to the container.
+//TODO: need a better cofg for LogManager
 
-builder.Services.AddControllers();
-
-builder.Services.AddCors(options =>
+try
 {
-    options.AddPolicy("CorsPolicy", builder =>
+    var builder = WebApplication.CreateBuilder(args);
+
+    // Add services to the container.
+
+    builder.Services.AddControllers();
+
+    builder.Services.AddCors(options =>
     {
-        builder.AllowAnyOrigin()
-        .AllowAnyMethod()
-        .AllowAnyMethod();
+        options.AddPolicy("CorsPolicy", builder =>
+        {
+            builder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyMethod();
+        });
     });
-});
 
-builder.Services.AddDbContext<RepositoryContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection"));
-});
+    builder.Services.AddDbContext<RepositoryContext>(options =>
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection"));
+    });
 
-builder.Services.AddScoped<ILoggerManager, LoggerManager>();
+    //builder.Services.AddScoped<ILoggerManager, LoggerManager>();
 
-builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
+    builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+    builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-var app = builder.Build();
+    var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+    else
+    {
+        app.UseHsts();
+    }
+    app.UseExceptionHandler(appError =>
+    {
+        appError.Run(async context =>
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.ContentType = "application/json";
+
+            var contextFeature = context.Features.Get<IExceptionHandlerFeature>;
+            if (contextFeature != null)
+            {
+                logger.Error($"Someting went wrong: {contextFeature}");
+
+                await context.Response.WriteAsync(new ErrorDetails()
+                {
+                    StatusCode = context.Response.StatusCode,
+                    Message = "Internal Server Error"
+                }.ToString());
+            }
+        });
+    });
+
+    app.UseForwardedHeaders();
+
+    // Configure the HTTP request pipeline.
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
 }
-else
+catch(Exception ex)
 {
-    app.UseHsts();
+    logger.Error(ex,"this is catch from main"); 
 }
-
-
-app.UseForwardedHeaders();
-
-// Configure the HTTP request pipeline.
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+finally
+{
+    NLog.LogManager.Shutdown();
+};
