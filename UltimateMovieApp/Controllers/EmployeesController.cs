@@ -113,5 +113,36 @@ namespace UltimateMovieApp.Controllers
             return NoContent();
         }
 
+        [HttpPut("{id}")]
+        public IActionResult  UpdateEmployeeForCompany
+            (Guid companyId,Guid id, [FromBody] EmployeeForUpdateDto employee)
+        {
+            if (employee==null)
+            {
+                _logger.LogError("EmployeeForUpdateDto object sent from client is null");
+                return BadRequest("EmployeeForUpdateDto object is null");
+            }
+
+            var company = _repositoryManager.Company.GetCompany(companyId, trackChange: false);
+            if (company==null)
+            {
+                _logger.LogInformation("Company with id: {companyId} doesn't exist in the database", companyId);
+                return NotFound();
+            }
+
+            var employeeEntite = _repositoryManager.Employee.GetEmployee(companyId,id,trackChanges: true);
+
+            if (employeeEntite==null)
+            {
+                _logger.LogInformation("Employes with id: {id} doesn't exist in the database",id);
+                return NotFound();
+            }
+
+            _mapper.Map(employee, employeeEntite);
+            _repositoryManager.Save();
+
+            return NoContent();
+        }
+
     }
 }

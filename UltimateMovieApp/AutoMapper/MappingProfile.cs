@@ -17,6 +17,8 @@ namespace UltimateMovieApp.AutoMapper
             CreateMap<CompanyForCreationDto, Company>();
 
             CreateMap<EmployeeForCreationDto, Employee>();
+
+            CreateMap<EmployeeForUpdateDto, Employee>();
         }
     }
 }
