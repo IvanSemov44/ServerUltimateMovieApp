@@ -2,6 +2,7 @@
 using Constracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UltimateMovieApp.Controllers
@@ -139,6 +140,41 @@ namespace UltimateMovieApp.Controllers
             }
 
             _mapper.Map(employee, employeeEntite);
+            _repositoryManager.Save();
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id}")]
+        public IActionResult PartiallyUpdateEmployeeForCompany
+            (Guid companyId,Guid id, [FromBody]JsonPatchDocument<EmployeeForUpdateDto> pachDoc)
+        {
+            if (pachDoc==null)
+            {
+                _logger.LogError("pachDoc object send from client is null");
+                return BadRequest("pachDoc object is null");
+            }
+
+             var company = _repositoryManager.Company.GetCompany(companyId,trackChange: false);
+            if (company == null)
+            {
+                _logger.LogInformation("Company with id: {companyId} doesn't exist in the database.",companyId);
+                return NotFound();
+            }
+
+            var employeeEntite = _repositoryManager.Employee.GetEmployee(companyId, id, trackChanges: true);
+            if (employeeEntite==null)
+            {
+                _logger.LogInformation("Employee with id: {id} doesn't exist in the database",id);
+                return NotFound();
+            }
+
+            var employeeToPach = _mapper.Map<EmployeeForUpdateDto>(employeeEntite);
+
+            pachDoc.ApplyTo(employeeToPach);
+
+            _mapper.Map(employeeToPach, employeeEntite);
+
             _repositoryManager.Save();
 
             return NoContent();

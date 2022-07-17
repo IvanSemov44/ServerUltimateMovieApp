@@ -1,5 +1,4 @@
 using Constracts;
-using Contracts;
 using Entities;
 using Entities.ErrorModel;
 using Microsoft.AspNetCore.Diagnostics;
@@ -19,7 +18,7 @@ try
 
     // Add services to the container.
 
-    builder.Services.AddControllers();
+    builder.Services.AddControllers().AddNewtonsoftJson();
 
     builder.Services.AddCors(options =>
     {
@@ -76,6 +75,7 @@ try
     app.UseForwardedHeaders();
 
     // Configure the HTTP request pipeline.
+
 
     app.UseHttpsRedirection();
 
