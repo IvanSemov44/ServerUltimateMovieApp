@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Constracts;
 using Entities.DataTransferObjects;
+using Entities.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UltimateMovieApp.Controllers
@@ -40,7 +41,7 @@ namespace UltimateMovieApp.Controllers
             return Ok(employeesDto);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetEmployeeForCompany")]
         public IActionResult GetEmployeeFromCompany(Guid companyId, Guid id)
         {
             var company = _repositoryManager.Company.GetCompany(companyId, false);
@@ -61,6 +62,33 @@ namespace UltimateMovieApp.Controllers
             var employeeDto = _mapper.Map<EmployeeDto>(employeeDB);
 
             return Ok(employeeDto);
+        }
+
+        [HttpPost]
+        public IActionResult CreateEmployeeForCompany(Guid companyId, [FromBody] EmployeeForCreationDto employee)
+        {
+            if (employee==null)
+            {
+                _logger.LogInformation("EmployeeForCreationDto object sent from client is null");
+                return BadRequest("EmployeeForCreationDto object is null");
+            }
+
+            var company = _repositoryManager.Company.GetCompany(companyId, trackChange: false);
+            if (company==null)
+            {
+                _logger.LogInformation("Company with id: {companyId} doesn't exist in the database",companyId);
+                return NotFound();
+            }
+
+            var employeeEntity = _mapper.Map<Employee>(employee);
+
+            _repositoryManager.Employee.CreateEmployeeForCompany(companyId, employeeEntity);
+            _repositoryManager.Save();
+
+            var employeeForReturn = _mapper.Map<EmployeeDto>(employeeEntity);
+
+            return CreatedAtRoute("GetEmployeeForCompany", new {companyId,id= employeeForReturn.Id}, employeeForReturn);
+
         }
     }
 }

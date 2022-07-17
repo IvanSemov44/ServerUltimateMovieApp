@@ -8,5 +8,6 @@
 
         public string Country { get; set; } = string.Empty;
 
+        public IEnumerable<EmployeeForCreationDto>? Employees { get; set; }
     }
 }
