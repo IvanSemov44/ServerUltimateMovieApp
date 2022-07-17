@@ -7,6 +7,8 @@ namespace Constracts
         public IEnumerable<Company> GetAllCompanies(bool trackChanges);
         Company? GetCompany(Guid companyId, bool trackChange);
 
-        public void CreateCreate(Company company);
+        public void CreateCompany(Company company);
+
+        public IEnumerable<Company> GetByIds(IEnumerable<Guid> ids,bool trackChanges);
     }
 }

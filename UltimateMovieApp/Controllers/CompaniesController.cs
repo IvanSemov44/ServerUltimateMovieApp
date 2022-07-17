@@ -3,7 +3,7 @@ using Constracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using UltimateMovieApp.ModelBinders;
 
 namespace UltimateMovieApp.Controllers
 {
@@ -42,7 +42,7 @@ namespace UltimateMovieApp.Controllers
 
             if (company == null)
             {
-                _loggerManager.LogInformation($"Company with id:{id} doesn't exist in the database");
+                _loggerManager.LogInformation("Company with id:{id} doesn't exist in the database",id);
                 return NotFound();
             }
             else
@@ -50,6 +50,29 @@ namespace UltimateMovieApp.Controllers
                 var companyDto = _mapper.Map<CompaniesDto>(company);
                 return Ok(companyDto);
             }
+        }
+
+        [HttpGet("/collection/({ids})", Name ="CompanyCollection")]
+        public IActionResult GeCompanytCollection
+            ([ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
+        {
+            if (ids==null)
+            {
+                _loggerManager.LogError("Parameter ids is null");
+                return BadRequest("Parameter ids is null");
+            }
+
+            var companiesEntities = _repositoryManager.Company.GetByIds(ids, trackChanges: false);
+
+            if (ids.Count()!=companiesEntities.Count())
+            {
+                _loggerManager.LogError("Some ids are not valid in a collection");
+                return NotFound();
+            }
+
+            var campaniesForReturn = _mapper.Map<IEnumerable<CompaniesDto>>(companiesEntities);
+
+            return Ok(campaniesForReturn);
         }
 
         [HttpPost]
@@ -63,12 +86,35 @@ namespace UltimateMovieApp.Controllers
 
             var companyEntity = _mapper.Map<Company>(company);
 
-            _repositoryManager.Company.CreateCreate(companyEntity);
+            _repositoryManager.Company.CreateCompany(companyEntity);
             _repositoryManager.Save();
 
             var companyToReturn = _mapper.Map<CompaniesDto>(companyEntity);
 
             return CreatedAtRoute("CompanyById", new { id = companyToReturn.Id }, companyToReturn);
+        }
+        [HttpPost("collection")]
+        public IActionResult CreateCompanyCollection([FromBody] IEnumerable<CompanyForCreationDto> companyCollection)
+        {
+            if (companyCollection == null)
+            {
+                _loggerManager.LogError("Company collection sent from client is null");
+                return BadRequest("Company collection is null");
+            }
+
+            var companyEntities = _mapper.Map<IEnumerable<Company>>(companyCollection);
+
+            foreach (var companyEntity in companyEntities)
+            {
+                _repositoryManager.Company.CreateCompany(companyEntity);
+            }
+
+            _repositoryManager.Save();
+
+            var companyCollectionToReturn = _mapper.Map<IEnumerable<CompaniesDto>>(companyEntities);
+            var ids = string.Join(",", companyCollectionToReturn.Select(x => x.Id));
+
+            return CreatedAtRoute("CompanyCollection", new { ids }, companyCollectionToReturn);
         }
     }
 }

@@ -26,6 +26,9 @@ namespace Repository
             => FindByConition(c => c.Id.Equals(companyId), trackChange)
                     .SingleOrDefault();
 
-        public void CreateCreate(Company company) => Create(company);
+        public void CreateCompany(Company company) => Create(company);
+
+        public IEnumerable<Company> GetByIds(IEnumerable<Guid> ids, bool trackChanges)
+        => FindByConition(c => ids.Contains(c.Id), trackChanges).ToList();
     }
 }
