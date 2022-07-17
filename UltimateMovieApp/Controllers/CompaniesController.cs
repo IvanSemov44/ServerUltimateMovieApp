@@ -22,6 +22,23 @@ namespace UltimateMovieApp.Controllers
             this._mapper = mapper;
         }
 
+
+        [HttpDelete("{companyId}")]
+        public IActionResult DeleteCompany([FromRoute]Guid companyId)
+        {
+            var company = _repositoryManager.Company.GetCompany(companyId, trackChange: false);
+            if (company == null)
+            {
+                _loggerManager.LogInformation("Company with id: {companyId} doesn't exist in the database.", companyId);
+                return NotFound();
+            }
+
+            _repositoryManager.Company.DeleteCompany(company);
+            _repositoryManager.Save();
+
+            return NoContent();
+        }
+
         public IActionResult GetCompanies()
         {
 
@@ -93,6 +110,7 @@ namespace UltimateMovieApp.Controllers
 
             return CreatedAtRoute("CompanyById", new { id = companyToReturn.Id }, companyToReturn);
         }
+
         [HttpPost("collection")]
         public IActionResult CreateCompanyCollection([FromBody] IEnumerable<CompanyForCreationDto> companyCollection)
         {
@@ -116,5 +134,6 @@ namespace UltimateMovieApp.Controllers
 
             return CreatedAtRoute("CompanyCollection", new { ids }, companyCollectionToReturn);
         }
+
     }
 }

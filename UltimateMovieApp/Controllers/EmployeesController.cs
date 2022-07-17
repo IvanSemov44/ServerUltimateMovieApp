@@ -41,7 +41,7 @@ namespace UltimateMovieApp.Controllers
             return Ok(employeesDto);
         }
 
-        [HttpGet("{id}", Name = "GetEmployeeForCompany")]
+        [HttpGet("{id:Guid}", Name = "GetEmployeeForCompany")]
         public IActionResult GetEmployeeFromCompany(Guid companyId, Guid id)
         {
             var company = _repositoryManager.Company.GetCompany(companyId, false);
@@ -89,6 +89,28 @@ namespace UltimateMovieApp.Controllers
 
             return CreatedAtRoute("GetEmployeeForCompany", new {companyId,id= employeeForReturn.Id}, employeeForReturn);
 
+        }
+        [HttpDelete("{id}")]
+        public IActionResult DeleteEmployeeForCompany([FromRoute] Guid companyId, Guid id)
+        {
+            var company = _repositoryManager.Company.GetCompany(companyId, trackChange: false);
+            if (company==null)
+            {
+                _logger.LogInformation("Company with id: {companyId} doesn't exist in the database", companyId);
+                return NotFound();
+            }
+            var employeeForCompany = _repositoryManager.Employee.GetEmployee(companyId, id,trackChanges: false);
+
+            if (employeeForCompany==null)
+            {
+                _logger.LogInformation("Employee with id: {id} doesn't exist in the database", id);
+                return NotFound();
+            }
+
+            _repositoryManager.Employee.DeleteEmployee(employeeForCompany);
+            _repositoryManager.Save();
+
+            return NoContent();
         }
 
     }
