@@ -7,6 +7,7 @@ using Repository;
 using System.Net;
 using NLog;
 using NLog.Web;
+using Microsoft.AspNetCore.Mvc;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
@@ -28,6 +29,11 @@ try
             .AllowAnyMethod()
             .AllowAnyMethod();
         });
+    });
+
+    builder.Services.Configure<ApiBehaviorOptions>(opt =>
+    {
+        opt.SuppressModelStateInvalidFilter = true;
     });
 
     builder.Services.AddDbContext<RepositoryContext>(options =>

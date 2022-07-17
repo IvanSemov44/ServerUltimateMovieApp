@@ -101,6 +101,12 @@ namespace UltimateMovieApp.Controllers
                 return BadRequest("CompanyForCreationDto object is null");
             }
 
+            if (!ModelState.IsValid)
+            {
+                _loggerManager.LogError("Invalid model state for the CompanyForCreationDto object");
+                return UnprocessableEntity(ModelState);
+            }
+
             var companyEntity = _mapper.Map<Company>(company);
 
             _repositoryManager.Company.CreateCompany(companyEntity);
