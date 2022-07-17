@@ -135,5 +135,28 @@ namespace UltimateMovieApp.Controllers
             return CreatedAtRoute("CompanyCollection", new { ids }, companyCollectionToReturn);
         }
 
+        [HttpPut("{id}")]
+        public IActionResult CompanyUpdate(Guid id, [FromBody] CompanyForUpdateDto company)
+        {
+            if (company == null)
+            {
+                _loggerManager.LogError("CompanyForUpdateDto object send from client is null");
+                return BadRequest("CompanyForUpdateDto object is null");
+            }
+
+            var companyEntite = _repositoryManager.Company.GetCompany(id, trackChange: true);
+
+            if (companyEntite == null)
+            {
+                _loggerManager.LogInformation("Complany with id: {id} doesn't exist in the database", id);
+                return NotFound();
+            }
+
+            _mapper.Map(company, companyEntite);
+            _repositoryManager.Save();
+
+            return NoContent();
+        }
+
     }
 }
