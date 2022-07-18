@@ -24,9 +24,9 @@ namespace UltimateMovieApp.Controllers
 
 
         [HttpDelete("{companyId}")]
-        public IActionResult DeleteCompany([FromRoute]Guid companyId)
+        public async Task<IActionResult> DeleteCompany([FromRoute] Guid companyId)
         {
-            var company = _repositoryManager.Company.GetCompany(companyId, trackChange: false);
+            var company = await _repositoryManager.Company.GetCompanyAsync(companyId, trackChange: false);
             if (company == null)
             {
                 _loggerManager.LogInformation("Company with id: {companyId} doesn't exist in the database.", companyId);
@@ -34,15 +34,16 @@ namespace UltimateMovieApp.Controllers
             }
 
             _repositoryManager.Company.DeleteCompany(company);
-            _repositoryManager.Save();
+            await _repositoryManager.SaveAsync();
 
             return NoContent();
         }
 
-        public IActionResult GetCompanies()
+        [HttpGet]
+        public async Task<IActionResult> GetCompanies()
         {
 
-            var companies = _repositoryManager.Company.GetAllCompanies(trackChanges: false);
+            var companies = await _repositoryManager.Company.GetAllCompaniesAsync(trackChanges: false);
 
             var companiesDto = _mapper.Map<IEnumerable<CompaniesDto>>(companies);
 
@@ -53,13 +54,13 @@ namespace UltimateMovieApp.Controllers
         }
 
         [HttpGet("{id}", Name = "companyById")]
-        public IActionResult GetCompany(Guid id)
+        public async Task<IActionResult> GetCompany(Guid id)
         {
-            var company = _repositoryManager.Company.GetCompany(id, trackChange: false);
+            var company = await _repositoryManager.Company.GetCompanyAsync(id, trackChange: false);
 
             if (company == null)
             {
-                _loggerManager.LogInformation("Company with id:{id} doesn't exist in the database",id);
+                _loggerManager.LogInformation("Company with id:{id} doesn't exist in the database", id);
                 return NotFound();
             }
             else
@@ -69,19 +70,19 @@ namespace UltimateMovieApp.Controllers
             }
         }
 
-        [HttpGet("/collection/({ids})", Name ="CompanyCollection")]
-        public IActionResult GeCompanytCollection
+        [HttpGet("/collection/({ids})", Name = "CompanyCollection")]
+        public async Task<IActionResult> GeCompanytCollection
             ([ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
         {
-            if (ids==null)
+            if (ids == null)
             {
                 _loggerManager.LogError("Parameter ids is null");
                 return BadRequest("Parameter ids is null");
             }
 
-            var companiesEntities = _repositoryManager.Company.GetByIds(ids, trackChanges: false);
+            var companiesEntities = await _repositoryManager.Company.GetByIdsAsync(ids, trackChanges: false);
 
-            if (ids.Count()!=companiesEntities.Count())
+            if (ids.Count() != companiesEntities.Count())
             {
                 _loggerManager.LogError("Some ids are not valid in a collection");
                 return NotFound();
@@ -93,9 +94,9 @@ namespace UltimateMovieApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateCompany([FromBody] CompanyForCreationDto company)
+        public async Task<IActionResult> CreateCompany([FromBody] CompanyForCreationDto company)
         {
-            if (company==null)
+            if (company == null)
             {
                 _loggerManager.LogInformation("CompanyForCreationDto object send from client is null");
                 return BadRequest("CompanyForCreationDto object is null");
@@ -110,7 +111,7 @@ namespace UltimateMovieApp.Controllers
             var companyEntity = _mapper.Map<Company>(company);
 
             _repositoryManager.Company.CreateCompany(companyEntity);
-            _repositoryManager.Save();
+            await _repositoryManager.SaveAsync();
 
             var companyToReturn = _mapper.Map<CompaniesDto>(companyEntity);
 
@@ -118,7 +119,7 @@ namespace UltimateMovieApp.Controllers
         }
 
         [HttpPost("collection")]
-        public IActionResult CreateCompanyCollection([FromBody] IEnumerable<CompanyForCreationDto> companyCollection)
+        public async Task<IActionResult> CreateCompanyCollection([FromBody] IEnumerable<CompanyForCreationDto> companyCollection)
         {
             if (companyCollection == null)
             {
@@ -133,7 +134,7 @@ namespace UltimateMovieApp.Controllers
                 _repositoryManager.Company.CreateCompany(companyEntity);
             }
 
-            _repositoryManager.Save();
+            await _repositoryManager.SaveAsync();
 
             var companyCollectionToReturn = _mapper.Map<IEnumerable<CompaniesDto>>(companyEntities);
             var ids = string.Join(",", companyCollectionToReturn.Select(x => x.Id));
@@ -142,7 +143,7 @@ namespace UltimateMovieApp.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult CompanyUpdate(Guid id, [FromBody] CompanyForUpdateDto company)
+        public async Task<IActionResult> CompanyUpdate(Guid id, [FromBody] CompanyForUpdateDto company)
         {
             if (company == null)
             {
@@ -150,13 +151,13 @@ namespace UltimateMovieApp.Controllers
                 return BadRequest("CompanyForUpdateDto object is null");
             }
 
-            if (! ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 _loggerManager.LogError("Invalid model state for the CompanyForUpdateDto object.");
                 return UnprocessableEntity(ModelState);
             }
 
-            var companyEntite = _repositoryManager.Company.GetCompany(id, trackChange: true);
+            var companyEntite = await _repositoryManager.Company.GetCompanyAsync(id, trackChange: true);
 
             if (companyEntite == null)
             {
@@ -165,7 +166,7 @@ namespace UltimateMovieApp.Controllers
             }
 
             _mapper.Map(company, companyEntite);
-            _repositoryManager.Save();
+            await _repositoryManager.SaveAsync();
 
             return NoContent();
         }

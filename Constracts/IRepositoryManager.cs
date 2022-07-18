@@ -12,6 +12,6 @@ namespace Constracts
 
         IEmployeeRepository Employee { get; }
 
-       void Save();
+       Task SaveAsync();
     }
 }

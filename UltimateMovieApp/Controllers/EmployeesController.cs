@@ -24,9 +24,9 @@ namespace UltimateMovieApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetEmployeesFromCompany(Guid companyId)
+        public async Task<IActionResult> GetEmployeesFromCompanyAsync(Guid companyId)
         {
-            var company = _repositoryManager.Company.GetCompany(companyId, trackChange: false);
+            var company =await _repositoryManager.Company.GetCompanyAsync(companyId, trackChange: false);
 
 
             if (company == null)
@@ -35,7 +35,7 @@ namespace UltimateMovieApp.Controllers
                 return NotFound();
             }
 
-            var employeesFromDb = _repositoryManager.Employee.GetEmployees(companyId, trackChanges: false);
+            var employeesFromDb = await _repositoryManager.Employee.GetEmployeesAsync(companyId, trackChanges: false);
 
             var employeesDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesFromDb);
 
@@ -43,9 +43,9 @@ namespace UltimateMovieApp.Controllers
         }
 
         [HttpGet("{id:Guid}", Name = "GetEmployeeForCompany")]
-        public IActionResult GetEmployeeFromCompany(Guid companyId, Guid id)
+        public async Task<IActionResult> GetEmployeeFromCompany(Guid companyId, Guid id)
         {
-            var company = _repositoryManager.Company.GetCompany(companyId, false);
+            var company =await  _repositoryManager.Company.GetCompanyAsync(companyId, false);
 
             if (company==null)
             {
@@ -53,7 +53,7 @@ namespace UltimateMovieApp.Controllers
                 return NotFound();
             }
 
-            var employeeDB = _repositoryManager.Employee.GetEmployee(companyId, id, trackChanges: false);
+            var employeeDB =await _repositoryManager.Employee.GetEmployeeAsync(companyId, id, trackChanges: false);
             if (employeeDB==null)
             {
                 _logger.LogInformation("Employee with id: {id}  doesn't exist in the database", id);
@@ -66,7 +66,7 @@ namespace UltimateMovieApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateEmployeeForCompany(Guid companyId, [FromBody] EmployeeForCreationDto employee)
+        public async Task<IActionResult> CreateEmployeeForCompany(Guid companyId, [FromBody] EmployeeForCreationDto employee)
         {
             if (employee==null)
             {
@@ -80,7 +80,7 @@ namespace UltimateMovieApp.Controllers
                 return UnprocessableEntity(ModelState);
             }
 
-            var company = _repositoryManager.Company.GetCompany(companyId, trackChange: false);
+            var company =await _repositoryManager.Company.GetCompanyAsync(companyId, trackChange: false);
             if (company==null)
             {
                 _logger.LogInformation("Company with id: {companyId} doesn't exist in the database",companyId);
@@ -90,7 +90,7 @@ namespace UltimateMovieApp.Controllers
             var employeeEntity = _mapper.Map<Employee>(employee);
 
             _repositoryManager.Employee.CreateEmployeeForCompany(companyId, employeeEntity);
-            _repositoryManager.Save();
+            await _repositoryManager.SaveAsync();
 
             var employeeForReturn = _mapper.Map<EmployeeDto>(employeeEntity);
 
@@ -98,15 +98,15 @@ namespace UltimateMovieApp.Controllers
 
         }
         [HttpDelete("{id}")]
-        public IActionResult DeleteEmployeeForCompany([FromRoute] Guid companyId, Guid id)
+        public async Task<IActionResult> DeleteEmployeeForCompany([FromRoute] Guid companyId, Guid id)
         {
-            var company = _repositoryManager.Company.GetCompany(companyId, trackChange: false);
+            var company =await _repositoryManager.Company.GetCompanyAsync(companyId, trackChange: false);
             if (company==null)
             {
                 _logger.LogInformation("Company with id: {companyId} doesn't exist in the database", companyId);
                 return NotFound();
             }
-            var employeeForCompany = _repositoryManager.Employee.GetEmployee(companyId, id,trackChanges: false);
+            var employeeForCompany =await _repositoryManager.Employee.GetEmployeeAsync(companyId, id,trackChanges: false);
 
             if (employeeForCompany==null)
             {
@@ -115,13 +115,13 @@ namespace UltimateMovieApp.Controllers
             }
 
             _repositoryManager.Employee.DeleteEmployee(employeeForCompany);
-            _repositoryManager.Save();
+            await _repositoryManager.SaveAsync();
 
             return NoContent();
         }
 
         [HttpPut("{id}")]
-        public IActionResult  UpdateEmployeeForCompany
+        public async Task<IActionResult> UpdateEmployeeForCompany
             (Guid companyId,Guid id, [FromBody] EmployeeForUpdateDto employee)
         {
             if (employee==null)
@@ -136,14 +136,14 @@ namespace UltimateMovieApp.Controllers
                 return UnprocessableEntity(ModelState);
             }
 
-            var company = _repositoryManager.Company.GetCompany(companyId, trackChange: false);
+            var company =await _repositoryManager.Company.GetCompanyAsync(companyId, trackChange: false);
             if (company==null)
             {
                 _logger.LogInformation("Company with id: {companyId} doesn't exist in the database", companyId);
                 return NotFound();
             }
 
-            var employeeEntite = _repositoryManager.Employee.GetEmployee(companyId,id,trackChanges: true);
+            var employeeEntite =await _repositoryManager.Employee.GetEmployeeAsync(companyId,id,trackChanges: true);
 
             if (employeeEntite==null)
             {
@@ -152,13 +152,13 @@ namespace UltimateMovieApp.Controllers
             }
 
             _mapper.Map(employee, employeeEntite);
-            _repositoryManager.Save();
+            await _repositoryManager.SaveAsync();
 
             return NoContent();
         }
 
         [HttpPatch("{id}")]
-        public IActionResult PartiallyUpdateEmployeeForCompany
+        public async Task<IActionResult> PartiallyUpdateEmployeeForCompany
             (Guid companyId,Guid id, [FromBody]JsonPatchDocument<EmployeeForUpdateDto> pachDoc)
         {
             if (pachDoc==null)
@@ -167,14 +167,14 @@ namespace UltimateMovieApp.Controllers
                 return BadRequest("pachDoc object is null");
             }
 
-            var company = _repositoryManager.Company.GetCompany(companyId,trackChange: false);
+            var company = await _repositoryManager.Company.GetCompanyAsync(companyId,trackChange: false);
             if (company == null)
             {
                 _logger.LogInformation("Company with id: {companyId} doesn't exist in the database.",companyId);
                 return NotFound();
             }
 
-            var employeeEntite = _repositoryManager.Employee.GetEmployee(companyId, id, trackChanges: true);
+            var employeeEntite =await _repositoryManager.Employee.GetEmployeeAsync(companyId, id, trackChanges: true);
             if (employeeEntite==null)
             {
                 _logger.LogInformation("Employee with id: {id} doesn't exist in the database",id);
@@ -197,7 +197,7 @@ namespace UltimateMovieApp.Controllers
 
             _mapper.Map(employeeToPach, employeeEntite);
 
-            _repositoryManager.Save();
+            await _repositoryManager.SaveAsync();
 
             return NoContent();
         }
