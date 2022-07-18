@@ -130,6 +130,12 @@ namespace UltimateMovieApp.Controllers
                 return BadRequest("EmployeeForUpdateDto object is null");
             }
 
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Invalid model state for the EmployeeForUpdateDto object.");
+                return UnprocessableEntity(ModelState);
+            }
+
             var company = _repositoryManager.Company.GetCompany(companyId, trackChange: false);
             if (company==null)
             {
@@ -161,7 +167,7 @@ namespace UltimateMovieApp.Controllers
                 return BadRequest("pachDoc object is null");
             }
 
-             var company = _repositoryManager.Company.GetCompany(companyId,trackChange: false);
+            var company = _repositoryManager.Company.GetCompany(companyId,trackChange: false);
             if (company == null)
             {
                 _logger.LogInformation("Company with id: {companyId} doesn't exist in the database.",companyId);
@@ -177,7 +183,17 @@ namespace UltimateMovieApp.Controllers
 
             var employeeToPach = _mapper.Map<EmployeeForUpdateDto>(employeeEntite);
 
-            pachDoc.ApplyTo(employeeToPach);
+            pachDoc.ApplyTo(employeeToPach, ModelState);
+
+            TryValidateModel(employeeToPach);
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Invalid model state for the pach Document.");
+                return UnprocessableEntity(ModelState);
+            }
+
+
 
             _mapper.Map(employeeToPach, employeeEntite);
 

@@ -150,6 +150,12 @@ namespace UltimateMovieApp.Controllers
                 return BadRequest("CompanyForUpdateDto object is null");
             }
 
+            if (! ModelState.IsValid)
+            {
+                _loggerManager.LogError("Invalid model state for the CompanyForUpdateDto object.");
+                return UnprocessableEntity(ModelState);
+            }
+
             var companyEntite = _repositoryManager.Company.GetCompany(id, trackChange: true);
 
             if (companyEntite == null)
