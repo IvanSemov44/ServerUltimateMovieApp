@@ -3,6 +3,7 @@ using Constracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
 using Microsoft.AspNetCore.Mvc;
+using UltimateMovieApp.ActionFilters;
 using UltimateMovieApp.ModelBinders;
 
 namespace UltimateMovieApp.Controllers
@@ -24,21 +25,17 @@ namespace UltimateMovieApp.Controllers
 
 
         [HttpDelete("{companyId}")]
+        [ServiceFilter(typeof(ValidateCompanyExistAttribute))]
         public async Task<IActionResult> DeleteCompany([FromRoute] Guid companyId)
         {
-            var company = await _repositoryManager.Company.GetCompanyAsync(companyId, trackChange: false);
-            if (company == null)
-            {
-                _loggerManager.LogInformation("Company with id: {companyId} doesn't exist in the database.", companyId);
-                return NotFound();
-            }
+            var company = HttpContext.Items["company"] as Company;
 
             _repositoryManager.Company.DeleteCompany(company);
             await _repositoryManager.SaveAsync();
 
             return NoContent();
         }
-
+        [HttpOptions]
         [HttpGet]
         public async Task<IActionResult> GetCompanies()
         {
@@ -94,6 +91,7 @@ namespace UltimateMovieApp.Controllers
         }
 
         [HttpPost]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> CreateCompany([FromBody] CompanyForCreationDto company)
         {
             if (company == null)
@@ -119,6 +117,7 @@ namespace UltimateMovieApp.Controllers
         }
 
         [HttpPost("collection")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> CreateCompanyCollection([FromBody] IEnumerable<CompanyForCreationDto> companyCollection)
         {
             if (companyCollection == null)
@@ -143,29 +142,13 @@ namespace UltimateMovieApp.Controllers
         }
 
         [HttpPut("{id}")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        [ServiceFilter(typeof(ValidateCompanyExistAttribute))]
         public async Task<IActionResult> CompanyUpdate(Guid id, [FromBody] CompanyForUpdateDto company)
         {
-            if (company == null)
-            {
-                _loggerManager.LogError("CompanyForUpdateDto object send from client is null");
-                return BadRequest("CompanyForUpdateDto object is null");
-            }
 
-            if (!ModelState.IsValid)
-            {
-                _loggerManager.LogError("Invalid model state for the CompanyForUpdateDto object.");
-                return UnprocessableEntity(ModelState);
-            }
-
-            var companyEntite = await _repositoryManager.Company.GetCompanyAsync(id, trackChange: true);
-
-            if (companyEntite == null)
-            {
-                _loggerManager.LogInformation("Complany with id: {id} doesn't exist in the database", id);
-                return NotFound();
-            }
-
-            _mapper.Map(company, companyEntite);
+            var companyEntity = HttpContext.Items["Company"] as Company; 
+            _mapper.Map(company, companyEntity);
             await _repositoryManager.SaveAsync();
 
             return NoContent();

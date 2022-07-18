@@ -4,6 +4,7 @@ using Entities.DataTransferObjects;
 using Entities.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using UltimateMovieApp.ActionFilters;
 
 namespace UltimateMovieApp.Controllers
 {
@@ -66,20 +67,10 @@ namespace UltimateMovieApp.Controllers
         }
 
         [HttpPost]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> CreateEmployeeForCompany(Guid companyId, [FromBody] EmployeeForCreationDto employee)
         {
-            if (employee==null)
-            {
-                _logger.LogInformation("EmployeeForCreationDto object sent from client is null");
-                return BadRequest("EmployeeForCreationDto object is null");
-            } 
-
-            if (!ModelState.IsValid )
-            {
-                _logger.LogError("Invalid model state for the EmployeeForCreationDto object");
-                return UnprocessableEntity(ModelState);
-            }
-
+            
             var company =await _repositoryManager.Company.GetCompanyAsync(companyId, trackChange: false);
             if (company==null)
             {
@@ -98,21 +89,11 @@ namespace UltimateMovieApp.Controllers
 
         }
         [HttpDelete("{id}")]
+        [ServiceFilter(typeof(ValidateEmplayeeForCompanyFilter))]
         public async Task<IActionResult> DeleteEmployeeForCompany([FromRoute] Guid companyId, Guid id)
         {
-            var company =await _repositoryManager.Company.GetCompanyAsync(companyId, trackChange: false);
-            if (company==null)
-            {
-                _logger.LogInformation("Company with id: {companyId} doesn't exist in the database", companyId);
-                return NotFound();
-            }
-            var employeeForCompany =await _repositoryManager.Employee.GetEmployeeAsync(companyId, id,trackChanges: false);
 
-            if (employeeForCompany==null)
-            {
-                _logger.LogInformation("Employee with id: {id} doesn't exist in the database", id);
-                return NotFound();
-            }
+            var employeeForCompany = HttpContext.Items["employee"] as Employee;
 
             _repositoryManager.Employee.DeleteEmployee(employeeForCompany);
             await _repositoryManager.SaveAsync();
@@ -121,35 +102,12 @@ namespace UltimateMovieApp.Controllers
         }
 
         [HttpPut("{id}")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        [ServiceFilter(typeof(ValidateEmplayeeForCompanyFilter))]
         public async Task<IActionResult> UpdateEmployeeForCompany
             (Guid companyId,Guid id, [FromBody] EmployeeForUpdateDto employee)
         {
-            if (employee==null)
-            {
-                _logger.LogError("EmployeeForUpdateDto object sent from client is null");
-                return BadRequest("EmployeeForUpdateDto object is null");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Invalid model state for the EmployeeForUpdateDto object.");
-                return UnprocessableEntity(ModelState);
-            }
-
-            var company =await _repositoryManager.Company.GetCompanyAsync(companyId, trackChange: false);
-            if (company==null)
-            {
-                _logger.LogInformation("Company with id: {companyId} doesn't exist in the database", companyId);
-                return NotFound();
-            }
-
-            var employeeEntite =await _repositoryManager.Employee.GetEmployeeAsync(companyId,id,trackChanges: true);
-
-            if (employeeEntite==null)
-            {
-                _logger.LogInformation("Employes with id: {id} doesn't exist in the database",id);
-                return NotFound();
-            }
+            var employeeEntite = HttpContext.Items["employee"] as Employee;
 
             _mapper.Map(employee, employeeEntite);
             await _repositoryManager.SaveAsync();
@@ -158,6 +116,7 @@ namespace UltimateMovieApp.Controllers
         }
 
         [HttpPatch("{id}")]
+        [ServiceFilter(typeof(ValidateEmplayeeForCompanyFilter))]
         public async Task<IActionResult> PartiallyUpdateEmployeeForCompany
             (Guid companyId,Guid id, [FromBody]JsonPatchDocument<EmployeeForUpdateDto> pachDoc)
         {
@@ -166,20 +125,7 @@ namespace UltimateMovieApp.Controllers
                 _logger.LogError("pachDoc object send from client is null");
                 return BadRequest("pachDoc object is null");
             }
-
-            var company = await _repositoryManager.Company.GetCompanyAsync(companyId,trackChange: false);
-            if (company == null)
-            {
-                _logger.LogInformation("Company with id: {companyId} doesn't exist in the database.",companyId);
-                return NotFound();
-            }
-
-            var employeeEntite =await _repositoryManager.Employee.GetEmployeeAsync(companyId, id, trackChanges: true);
-            if (employeeEntite==null)
-            {
-                _logger.LogInformation("Employee with id: {id} doesn't exist in the database",id);
-                return NotFound();
-            }
+            var employeeEntite = HttpContext.Items["employee"] as Employee;
 
             var employeeToPach = _mapper.Map<EmployeeForUpdateDto>(employeeEntite);
 

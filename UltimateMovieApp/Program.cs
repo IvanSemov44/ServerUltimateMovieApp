@@ -8,6 +8,8 @@ using System.Net;
 using NLog;
 using NLog.Web;
 using Microsoft.AspNetCore.Mvc;
+using UltimateMovieApp.ActionFilters;
+using Microsoft.Extensions.DependencyInjection;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
@@ -18,6 +20,12 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     // Add services to the container.
+    //builder.Services.AddControllers(options =>
+    //{
+    //    options.Filters.Add<ValidationFilterAttribute>();
+    //});
+
+
 
     builder.Services.AddControllers().AddNewtonsoftJson();
 
@@ -25,9 +33,10 @@ try
     {
         options.AddPolicy("CorsPolicy", builder =>
         {
-            builder.AllowAnyOrigin()
+            builder.WithOrigins("http://localhost:3000/")
+            .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowAnyMethod();
+            .SetIsOriginAllowedToAllowWildcardSubdomains() ;
         });
     });
 
@@ -35,13 +44,17 @@ try
     {
         opt.SuppressModelStateInvalidFilter = true;
     });
+    builder.Services.AddScoped<ValidationFilterAttribute>();
+
+    builder.Services.AddScoped<ValidateCompanyExistAttribute>();
+
+    builder.Services.AddScoped<ValidateEmplayeeForCompanyFilter>();
 
     builder.Services.AddDbContext<RepositoryContext>(options =>
     {
         options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection"));
     });
 
-    //builder.Services.AddScoped<ILoggerManager, LoggerManager>();
 
     builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 
@@ -82,8 +95,11 @@ try
 
     // Configure the HTTP request pipeline.
 
+    app.UseRouting();
 
-    app.UseHttpsRedirection();
+    app.UseCors("CorsPolicy");
+
+    //app.UseHttpsRedirection();
 
     app.UseAuthorization();
 
