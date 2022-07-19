@@ -11,109 +11,71 @@ using Microsoft.AspNetCore.Mvc;
 using UltimateMovieApp.ActionFilters;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Serialization;
+using Microsoft.EntityFrameworkCore.Design;
 
-var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
-//TODO: need a better cofg for LogManager
 
-try
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<RepositoryContext>(options =>
 {
-    var builder = WebApplication.CreateBuilder(args);
-
-    // Add services to the container.
-    //builder.Services.AddControllers(options =>
-    //{
-    //    options.Filters.Add<ValidationFilterAttribute>();
-    //});
+    options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection"));
+});
 
 
+builder.Services.Configure<ApiBehaviorOptions>(opt =>
+{
+    opt.SuppressModelStateInvalidFilter = true;
+});
 
-    builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddControllers().AddNewtonsoftJson();
 
-    builder.Services.AddCors(options =>
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", builder =>
     {
-        options.AddPolicy("CorsPolicy", builder =>
-        {
-            builder.WithOrigins("http://localhost:3000/")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowAnyOrigin();
+        builder.WithOrigins("http://localhost:3000/")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowAnyOrigin();
             //.SetIsOriginAllowedToAllowWildcardSubdomains() ;
-        });
     });
+});
 
-    builder.Services.Configure<ApiBehaviorOptions>(opt =>
-    {
-        opt.SuppressModelStateInvalidFilter = true;
-    });
-    builder.Services.AddScoped<ValidationFilterAttribute>();
+builder.Services.AddScoped<ValidationFilterAttribute>();
 
-    builder.Services.AddScoped<ValidateCompanyExistAttribute>();
+builder.Services.AddScoped<ValidateCompanyExistAttribute>();
 
-    builder.Services.AddScoped<ValidateEmplayeeForCompanyFilter>();
+builder.Services.AddScoped<ValidateEmplayeeForCompanyFilter>();
 
-    builder.Services.AddDbContext<RepositoryContext>(options =>
-    {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection"));
-    });
+builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-    builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
+var app = builder.Build();
 
-    builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-    var app = builder.Build();
-
-    if (app.Environment.IsDevelopment())
-    {
-        app.UseDeveloperExceptionPage();
-    }
-    else
-    {
-        app.UseHsts();
-    }
-    app.UseExceptionHandler(appError =>
-    {
-        appError.Run(async context =>
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            context.Response.ContentType = "application/json";
-
-            var contextFeature = context.Features.Get<IExceptionHandlerFeature>;
-            if (contextFeature != null)
-            {
-                logger.Error($"Someting went wrong: {contextFeature}");
-
-                await context.Response.WriteAsync(new ErrorDetails()
-                {
-                    StatusCode = context.Response.StatusCode,
-                    Message = "Internal Server Error"
-                }.ToString());
-            }
-        });
-    });
-
-    app.UseForwardedHeaders();
-
-    // Configure the HTTP request pipeline.
-
-    app.UseRouting();
-
-    app.UseCors("CorsPolicy");
-
-    //app.UseHttpsRedirection();
-
-    app.UseAuthorization();
-
-    app.MapControllers();
-
-    app.Run();
-}
-catch(Exception ex)
+if (app.Environment.IsDevelopment())
 {
-    logger.Error(ex,"this is catch from main"); 
+    app.UseDeveloperExceptionPage();
 }
-finally
+else
 {
-    NLog.LogManager.Shutdown();
-};
+    app.UseHsts();
+}
+app.UseExceptionHandler();
+
+app.UseForwardedHeaders();
+
+// Configure the HTTP request pipeline.
+
+app.UseRouting();
+
+app.UseCors("CorsPolicy");
+
+//app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
