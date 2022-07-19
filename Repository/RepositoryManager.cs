@@ -13,6 +13,7 @@ namespace Repository
         private readonly RepositoryContext _repositoryContext;
         private ICompanyRepository? _companyRepository;
         private IEmployeeRepository? _employeeRepository;
+        private IMovieRepository? _movieRepository;
 
         public RepositoryManager(RepositoryContext repositoryContext)
         {
@@ -38,6 +39,18 @@ namespace Repository
                     _employeeRepository = new EmployeeRepository(_repositoryContext);
 
                 return _employeeRepository;
+            }
+        }
+
+        public IMovieRepository Movie
+        {
+            get
+            {
+
+                if(_movieRepository == null)
+                    _movieRepository = new MovieRepository(_repositoryContext);
+
+                return _movieRepository;
             }
         }
         public Task SaveAsync() => _repositoryContext.SaveChangesAsync();
