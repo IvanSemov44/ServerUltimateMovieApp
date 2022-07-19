@@ -2,6 +2,7 @@
 using Constracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using UltimateMovieApp.ActionFilters;
 using UltimateMovieApp.ModelBinders;
@@ -35,7 +36,7 @@ namespace UltimateMovieApp.Controllers
 
             return NoContent();
         }
-        [HttpOptions]
+
         [HttpGet]
         public async Task<IActionResult> GetCompanies()
         {
@@ -147,7 +148,8 @@ namespace UltimateMovieApp.Controllers
         public async Task<IActionResult> CompanyUpdate(Guid id, [FromBody] CompanyForUpdateDto company)
         {
 
-            var companyEntity = HttpContext.Items["Company"] as Company; 
+            var companyEntity = HttpContext.Items["company"] as Company; 
+
             _mapper.Map(company, companyEntity);
             await _repositoryManager.SaveAsync();
 

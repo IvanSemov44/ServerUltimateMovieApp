@@ -17,7 +17,7 @@ namespace UltimateMovieApp.ActionFilters
         {
             var trackChanges = context.HttpContext.Request.Method.Equals("PUT");
             var id= (Guid)context.ActionArguments["id"];
-            var company = _repository.Company.GetCompanyAsync(id, trackChanges);
+            var company = await _repository.Company.GetCompanyAsync(id, trackChanges);
 
             if (company == null)
             {

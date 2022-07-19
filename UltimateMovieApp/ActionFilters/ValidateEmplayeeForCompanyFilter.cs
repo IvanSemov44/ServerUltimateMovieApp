@@ -18,7 +18,7 @@ namespace UltimateMovieApp.ActionFilters
             var method = context.HttpContext.Request.Method;
             var trackChanges = (method.Equals("PUT") || method.Equals("PATCH")) ? true : false;
             var companyId = (Guid)context.ActionArguments["companyId"];
-            var company = _repository.Company.GetCompanyAsync(companyId, trackChanges);
+            var company = await _repository.Company.GetCompanyAsync(companyId, false);
 
             if (company == null)
             {
@@ -28,7 +28,7 @@ namespace UltimateMovieApp.ActionFilters
 
 
             var id = (Guid)context.ActionArguments["id"];
-            var emplayee = _repository.Employee.GetEmployeeAsync(companyId,id, trackChanges);
+            var emplayee = await _repository.Employee.GetEmployeeAsync(companyId,id, trackChanges);
             if (emplayee == null)
             {
                 context.Result = new NotFoundResult();

@@ -10,6 +10,7 @@ using NLog.Web;
 using Microsoft.AspNetCore.Mvc;
 using UltimateMovieApp.ActionFilters;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Serialization;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
@@ -36,7 +37,8 @@ try
             builder.WithOrigins("http://localhost:3000/")
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .SetIsOriginAllowedToAllowWildcardSubdomains() ;
+            .AllowAnyOrigin();
+            //.SetIsOriginAllowedToAllowWildcardSubdomains() ;
         });
     });
 
