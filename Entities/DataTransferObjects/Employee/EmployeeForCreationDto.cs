@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entities.DataTransferObjects
+namespace Entities.DataTransferObjects.Employee
 {
     public class EmployeeForCreationDto : EmployeeForManipulationDto
     {

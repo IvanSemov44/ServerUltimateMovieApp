@@ -4,14 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entities.DataTransferObjects
+namespace Entities.DataTransferObjects.Employee
 {
-    public class CompaniesDto
+    public class EmployeeDto
     {
         public Guid Id { get; set; }
-        
+
         public string Name { get; set; } = string.Empty;
 
-        public string FullAddress { get; set; } = string.Empty;
+        public int Age { get; set; }
+
+        public string Position { get; set; } = string.Empty;
+
     }
 }

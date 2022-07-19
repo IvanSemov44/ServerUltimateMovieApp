@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entities.DataTransferObjects
+namespace Entities.DataTransferObjects.Movie
 {
-    public class CompanyForUpdateDto: CompanyForManipulationDto
+    internal class MovieForCreateDto
     {
     }
 }

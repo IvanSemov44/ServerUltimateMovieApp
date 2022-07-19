@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Constracts;
-using Entities.DataTransferObjects;
+using Entities.DataTransferObjects.Company;
 using Entities.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;

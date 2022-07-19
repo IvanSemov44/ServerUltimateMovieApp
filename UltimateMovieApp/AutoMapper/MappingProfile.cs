@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
-using Entities.DataTransferObjects;
+using Entities.DataTransferObjects.Company;
+using Entities.DataTransferObjects.Employee;
 using Entities.Models;
 
 namespace UltimateMovieApp.AutoMapper
