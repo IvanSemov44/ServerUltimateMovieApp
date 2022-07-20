@@ -1,11 +1,5 @@
 ﻿using Constracts;
 using Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Repository
 {
     public class RepositoryManager : IRepositoryManager
@@ -46,13 +40,13 @@ namespace Repository
         {
             get
             {
-
-                if(_movieRepository == null)
+                if (_movieRepository == null)
                     _movieRepository = new MovieRepository(_repositoryContext);
 
                 return _movieRepository;
             }
         }
+
         public Task SaveAsync() => _repositoryContext.SaveChangesAsync();
     }
 }

@@ -43,23 +43,12 @@ namespace UltimateMovieApp.Controllers
             return Ok(employeesDto);
         }
 
-        [HttpGet("{id:Guid}", Name = "GetEmployeeForCompany")]
-        public async Task<IActionResult> GetEmployeeFromCompany(Guid companyId, Guid id)
+        [HttpGet("{id}")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        [ServiceFilter(typeof(ValidateEmplayeeForCompanyFilter))]
+        public IActionResult GetEmployeeFromCompany(Guid companyId, Guid id)
         {
-            var company =await  _repositoryManager.Company.GetCompanyAsync(companyId, false);
-
-            if (company==null)
-            {
-                _logger.LogInformation("Company with id: {companyId} doesn't exist in the database", companyId);
-                return NotFound();
-            }
-
-            var employeeDB =await _repositoryManager.Employee.GetEmployeeAsync(companyId, id, trackChanges: false);
-            if (employeeDB==null)
-            {
-                _logger.LogInformation("Employee with id: {id}  doesn't exist in the database", id);
-                return NotFound();
-            }
+            var employeeDB = HttpContext.Items["employee"] as Employee;
 
             var employeeDto = _mapper.Map<EmployeeDto>(employeeDB);
 

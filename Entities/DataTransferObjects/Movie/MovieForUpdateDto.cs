@@ -1,6 +1,6 @@
 ﻿namespace Entities.DataTransferObjects.Movie
 {
-    internal class MovieForUpdateDto
+    public class MovieForUpdateDto : MovieForManipulationDto
     {
     }
 }

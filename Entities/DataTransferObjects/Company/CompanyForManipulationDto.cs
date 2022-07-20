@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Entities.DataTransferObjects.Employee;
+using System.ComponentModel.DataAnnotations;
 
 namespace Entities.DataTransferObjects.Company
 {
-    public class CompanyForManipulationDto
+    public abstract class CompanyForManipulationDto
     {
         [Required(ErrorMessage = "Company name is a required field.")]
         [MaxLength(30, ErrorMessage = "Maximum length for the Name is 30 characters.")]

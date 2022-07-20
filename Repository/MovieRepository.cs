@@ -27,12 +27,7 @@ namespace Repository
                     .OrderBy(c => c.Year)
                     .ToListAsync();
 
-        public async Task<IEnumerable<Movie>> GetByIdsAsync(IEnumerable<Guid> ids, bool trackChanges)
-            => await FindByConition(c => ids.Contains(c.Id), trackChanges)
-                    .ToListAsync();
-
-        public async Task<Movie?> GetMovieAsync(Guid movieId, bool trackChange)
-            => await FindByConition(c => c.Id.Equals(movieId), trackChange)
-                    .SingleOrDefaultAsync();
+        public async Task<Movie?> GetMovieByIdsAsync(Guid id, bool trackChanges)
+            => await FindByConition(c => c.Id.Equals(id), trackChanges).SingleOrDefaultAsync();
     }
 }

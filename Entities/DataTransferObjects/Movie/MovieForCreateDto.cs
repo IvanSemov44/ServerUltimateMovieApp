@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Entities.DataTransferObjects.Movie
+﻿namespace Entities.DataTransferObjects.Movie
 {
-    internal class MovieForCreateDto
+    public class MovieForCreateDto : MovieForManipulationDto
     {
+        public MovieForCreateDto()
+        {
+        }
     }
 }

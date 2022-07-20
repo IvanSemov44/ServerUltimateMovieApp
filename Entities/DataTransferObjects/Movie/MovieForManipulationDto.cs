@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Entities.DataTransferObjects.Movie
+﻿namespace Entities.DataTransferObjects.Movie
 {
-    public class MovieForManipulationDto
+    public abstract class MovieForManipulationDto
     {
         public string Title { get; set; } = string.Empty;
 

@@ -4,16 +4,11 @@ using Entities.ErrorModel;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Repository;
-using System.Net;
-using NLog;
-using NLog.Web;
 using Microsoft.AspNetCore.Mvc;
 using UltimateMovieApp.ActionFilters;
-using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Serialization;
-using Microsoft.EntityFrameworkCore.Design;
-
-
+using Microsoft.Extensions.Logging;
+using UltimateMovieApp.Extensions;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +16,6 @@ builder.Services.AddDbContext<RepositoryContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection"));
 });
-
 
 builder.Services.Configure<ApiBehaviorOptions>(opt =>
 {
@@ -38,11 +32,14 @@ builder.Services.AddCors(options =>
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowAnyOrigin();
-            //.SetIsOriginAllowedToAllowWildcardSubdomains() ;
+        //.SetIsOriginAllowedToAllowWildcardSubdomains() ;
     });
 });
 
+
 builder.Services.AddScoped<ValidationFilterAttribute>();
+
+builder.Services.AddScoped<ValidateMovieForExistFilter>();
 
 builder.Services.AddScoped<ValidateCompanyExistAttribute>();
 
@@ -62,7 +59,8 @@ else
 {
     app.UseHsts();
 }
-app.UseExceptionHandler();
+
+ExceptionMiddwareExtensions.ConfigureExceptionHandler(app);
 
 app.UseForwardedHeaders();
 

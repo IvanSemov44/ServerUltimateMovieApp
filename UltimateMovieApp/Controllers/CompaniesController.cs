@@ -2,7 +2,6 @@
 using Constracts;
 using Entities.DataTransferObjects.Company;
 using Entities.Models;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using UltimateMovieApp.ActionFilters;
 using UltimateMovieApp.ModelBinders;
@@ -14,13 +13,11 @@ namespace UltimateMovieApp.Controllers
     public class CompaniesController : Controller
     {
         private readonly IRepositoryManager _repositoryManager;
-        private readonly ILogger<CompaniesController> _loggerManager;
         private readonly IMapper _mapper;
 
-        public CompaniesController(IRepositoryManager repositoryManager, ILogger<CompaniesController> loggerManager, IMapper mapper)
+        public CompaniesController(IRepositoryManager repositoryManager, IMapper mapper)
         {
             this._repositoryManager = repositoryManager;
-            this._loggerManager = loggerManager;
             this._mapper = mapper;
         }
 
@@ -45,8 +42,6 @@ namespace UltimateMovieApp.Controllers
 
             var companiesDto = _mapper.Map<IEnumerable<CompaniesDto>>(companies);
 
-            _loggerManager.LogInformation("Hello from CompContr");
-
 
             return Ok(companiesDto);
         }
@@ -58,7 +53,6 @@ namespace UltimateMovieApp.Controllers
 
             if (company == null)
             {
-                _loggerManager.LogInformation("Company with id:{id} doesn't exist in the database", id);
                 return NotFound();
             }
             else
@@ -74,15 +68,13 @@ namespace UltimateMovieApp.Controllers
         {
             if (ids == null)
             {
-                _loggerManager.LogError("Parameter ids is null");
-                return BadRequest("Parameter ids is null");
+                 return BadRequest("Parameter ids is null");
             }
 
             var companiesEntities = await _repositoryManager.Company.GetByIdsAsync(ids, trackChanges: false);
 
             if (ids.Count() != companiesEntities.Count())
             {
-                _loggerManager.LogError("Some ids are not valid in a collection");
                 return NotFound();
             }
 
@@ -97,13 +89,11 @@ namespace UltimateMovieApp.Controllers
         {
             if (company == null)
             {
-                _loggerManager.LogInformation("CompanyForCreationDto object send from client is null");
                 return BadRequest("CompanyForCreationDto object is null");
             }
 
             if (!ModelState.IsValid)
             {
-                _loggerManager.LogError("Invalid model state for the CompanyForCreationDto object");
                 return UnprocessableEntity(ModelState);
             }
 
@@ -123,7 +113,6 @@ namespace UltimateMovieApp.Controllers
         {
             if (companyCollection == null)
             {
-                _loggerManager.LogError("Company collection sent from client is null");
                 return BadRequest("Company collection is null");
             }
 
