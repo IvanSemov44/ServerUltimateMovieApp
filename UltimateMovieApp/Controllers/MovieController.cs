@@ -69,5 +69,17 @@ namespace UltimateMovieApp.Controllers
 
             return NoContent();
         }
+
+        [HttpDelete("{id}")]
+        [ServiceFilter(typeof(ValidateMovieForExistFilter))]
+        public async Task<IActionResult> DeleteMovie([FromRoute]Guid id)
+        {
+            var movie = HttpContext.Items["movie"] as Movie;
+
+             _repositoryManager.Movie.DeleteMovie(movie);
+            await _repositoryManager.SaveAsync();
+
+            return NoContent();
+        }
     }
 }
