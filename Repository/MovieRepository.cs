@@ -1,6 +1,7 @@
 ﻿using Constracts;
 using Entities;
 using Entities.Models;
+using Entities.RequestFeatures;
 using Microsoft.EntityFrameworkCore;
 
 namespace Repository
@@ -22,11 +23,17 @@ namespace Repository
             Delete(movie);
         }
 
-        public async Task<IEnumerable<Movie>> GetAllMovieAsync(bool trackChanges)
-            => await FindAll(trackChanges)
-                    .OrderBy(c => c.Year)
+        public async Task<PageList<Movie>> GetMoviesAsync(MovieParameters movieParameters, bool trackChanges)
+        {
+            var movies = await FindAll(trackChanges)
+                    //.OrderBy(c => c.Title)
+                    //.Skip((movieParameters.PageNumber - 1) * movieParameters.PageSize)
+                    //.Take(movieParameters.PageSize)
                     .ToListAsync();
 
+            return PageList<Movie>
+                .ToPageList(movies, movieParameters.PageNumber, movieParameters.PageSize);
+        }
         public async Task<Movie?> GetMovieByIdsAsync(Guid id, bool trackChanges)
             => await FindByConition(c => c.Id.Equals(id), trackChanges).SingleOrDefaultAsync();
     }

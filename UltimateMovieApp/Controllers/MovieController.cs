@@ -2,7 +2,9 @@
 using Constracts;
 using Entities.DataTransferObjects.Movie;
 using Entities.Models;
+using Entities.RequestFeatures;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using UltimateMovieApp.ActionFilters;
 
 namespace UltimateMovieApp.Controllers
@@ -23,9 +25,12 @@ namespace UltimateMovieApp.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetMovies()
+        public async Task<IActionResult> GetMovies([FromQuery] MovieParameters movieParameters)
         {
-            var movies = await _repositoryManager.Movie.GetAllMovieAsync(trackChanges: false);
+            var movies = await _repositoryManager.Movie.GetMoviesAsync(movieParameters, trackChanges: false);
+
+            Response.Headers.Add("X-Pagination",
+                JsonConvert.SerializeObject(movies.MetaData));
 
             var movieDto = _mapper.Map<IEnumerable<MovieDto>>(movies);
 
