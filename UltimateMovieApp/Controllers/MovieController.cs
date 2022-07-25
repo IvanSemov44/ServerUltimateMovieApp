@@ -3,6 +3,7 @@ using Constracts;
 using Entities.DataTransferObjects.Movie;
 using Entities.Models;
 using Entities.RequestFeatures;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using UltimateMovieApp.ActionFilters;
@@ -23,11 +24,12 @@ namespace UltimateMovieApp.Controllers
             this._mapper = mapper;
         }
 
-
+        [EnableCors("CorsPolicy")]
         [HttpGet]
         public async Task<IActionResult> GetMovies([FromQuery] MovieParameters movieParameters)
         {
             var movies = await _repositoryManager.Movie.GetMoviesAsync(movieParameters, trackChanges: false);
+//Response.Headers.Add("Access-Control-Allow-Origin", "X-Pagination");
 
             Response.Headers.Add("X-Pagination",
                 JsonConvert.SerializeObject(movies.MetaData));

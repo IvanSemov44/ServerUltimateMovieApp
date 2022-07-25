@@ -9,6 +9,7 @@ using UltimateMovieApp.ActionFilters;
 using Microsoft.Extensions.Logging;
 using UltimateMovieApp.Extensions;
 using System.Net;
+using Microsoft.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,15 +25,23 @@ builder.Services.Configure<ApiBehaviorOptions>(opt =>
 
 builder.Services.AddControllers().AddNewtonsoftJson();
 
+builder.Services.AddControllers(opt =>
+{
+    opt.RespectBrowserAcceptHeader = true;
+}).AddXmlSerializerFormatters();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", builder =>
     {
-        builder.WithOrigins("http://localhost:3000/")
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowAnyOrigin();
-        //.SetIsOriginAllowedToAllowWildcardSubdomains() ;
+        builder.WithOrigins("http://localhost:3000")
+        //.WithHeaders(HeaderNames.ContentType, "X-Pagination")
+        .WithExposedHeaders("X-Pagination")
+       // .AllowAnyHeader()
+        //.AllowAnyMethod()
+        //.AllowAnyOrigin();
+       //.AllowCredentials();
+        .SetIsOriginAllowedToAllowWildcardSubdomains();
     });
 });
 
@@ -75,5 +84,11 @@ app.UseCors("CorsPolicy");
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseEndpoints(endpoint =>
+{
+    endpoint.MapControllers()
+    .RequireCors("CorsPolicy");
+});
 
 app.Run();
