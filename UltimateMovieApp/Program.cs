@@ -1,15 +1,13 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+
+using UltimateMovieApp.ActionFilters;
+using UltimateMovieApp.Extensions;
+using Entities.Models;
 using Constracts;
 using Entities;
-using Entities.ErrorModel;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.EntityFrameworkCore;
 using Repository;
-using Microsoft.AspNetCore.Mvc;
-using UltimateMovieApp.ActionFilters;
-using Microsoft.Extensions.Logging;
-using UltimateMovieApp.Extensions;
-using System.Net;
-using Microsoft.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +15,18 @@ builder.Services.AddDbContext<RepositoryContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection"));
 });
+
+builder.Services.AddIdentityCore<MovieUser>(opt =>
+{
+    opt.Password.RequireDigit = false;
+    opt.Password.RequireLowercase = false;
+    opt.Password.RequireUppercase = false;
+    opt.Password.RequireNonAlphanumeric = false;
+    opt.Password.RequiredLength = 6;
+    opt.User.RequireUniqueEmail = true;
+});
+builder.Services.AddIdentity<MovieUser, IdentityRole>()
+    .AddEntityFrameworkStores<RepositoryContext>();
 
 builder.Services.Configure<ApiBehaviorOptions>(opt =>
 {
@@ -36,11 +46,13 @@ builder.Services.AddCors(options =>
     {
         builder.WithOrigins("http://localhost:3000")
         //.WithHeaders(HeaderNames.ContentType, "X-Pagination")
+        .AllowAnyHeader()
         .WithExposedHeaders("X-Pagination")
-       // .AllowAnyHeader()
+        .AllowAnyMethod()
+        // .AllowAnyHeader()
         //.AllowAnyMethod()
         //.AllowAnyOrigin();
-       //.AllowCredentials();
+        //.AllowCredentials();
         .SetIsOriginAllowedToAllowWildcardSubdomains();
     });
 });
@@ -82,6 +94,7 @@ app.UseCors("CorsPolicy");
 //app.UseHttpsRedirection();
 
 app.UseAuthorization();
+app.UseAuthentication();
 
 app.MapControllers();
 

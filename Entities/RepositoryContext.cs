@@ -1,14 +1,20 @@
 ﻿using Entities.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Entities
 {
-    public class RepositoryContext : DbContext
+    public class RepositoryContext : IdentityDbContext<MovieUser>
     {
-        public RepositoryContext(DbContextOptions options)
-            :base(options)
-        {
 
+        public RepositoryContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<Company>? Companies { get; set; }
