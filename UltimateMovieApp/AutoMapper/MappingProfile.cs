@@ -2,6 +2,7 @@
 using Entities.DataTransferObjects.Company;
 using Entities.DataTransferObjects.Employee;
 using Entities.DataTransferObjects.Movie;
+using Entities.DataTransferObjects.MovieUser;
 using Entities.Models;
 
 namespace UltimateMovieApp.AutoMapper
@@ -34,6 +35,8 @@ namespace UltimateMovieApp.AutoMapper
             CreateMap<MovieForCreateDto, Movie>();
 
             CreateMap<MovieForUpdateDto, Movie>();
+
+            CreateMap<MovieUserForRegistrationDto, MovieUser>();
         }
     }
 }

@@ -1,12 +1,16 @@
-﻿using AutoMapper;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
+
+using Newtonsoft.Json;
+using AutoMapper;
+
+using UltimateMovieApp.ActionFilters;
+
 using Constracts;
-using Entities.DataTransferObjects.Movie;
+
 using Entities.Models;
 using Entities.RequestFeatures;
-using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using UltimateMovieApp.ActionFilters;
+using Entities.DataTransferObjects.Movie;
 
 namespace UltimateMovieApp.Controllers
 {
