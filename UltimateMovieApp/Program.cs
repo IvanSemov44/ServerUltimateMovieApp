@@ -1,6 +1,9 @@
-using Microsoft.EntityFrameworkCore;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 using UltimateMovieApp.ActionFilters;
 using UltimateMovieApp.Extensions;
@@ -10,6 +13,7 @@ using Entities;
 using Repository;
 
 var builder = WebApplication.CreateBuilder(args);
+ConfigurationManager configuration = builder.Configuration;
 
 builder.Services.AddDbContext<RepositoryContext>(options =>
 {
@@ -32,6 +36,27 @@ builder.Services.Configure<ApiBehaviorOptions>(opt =>
 {
     opt.SuppressModelStateInvalidFilter = true;
 });
+
+builder.Services.AddAuthentication(opt =>
+{
+    opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(opt =>
+{
+    opt.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateIssuerSigningKey = true,
+
+        ValidIssuer = configuration["JwtSettings:ValidIssuer"],
+        ValidAudience = configuration["JwtSettings:ValidAudince"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Secret"]))
+    };
+});
+
+
 
 builder.Services.AddControllers().AddNewtonsoftJson();
 
