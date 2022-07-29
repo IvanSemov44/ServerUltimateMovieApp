@@ -11,6 +11,7 @@ using Constracts;
 using Entities.Models;
 using Entities.RequestFeatures;
 using Entities.DataTransferObjects.Movie;
+using Microsoft.AspNetCore.Authorization;
 
 namespace UltimateMovieApp.Controllers
 {
@@ -29,12 +30,11 @@ namespace UltimateMovieApp.Controllers
         }
 
         [EnableCors("CorsPolicy")]
-        [HttpGet]
+        [HttpGet, /*Authorize(Roles = "Admin")*/]
         public async Task<IActionResult> GetMovies([FromQuery] MovieParameters movieParameters)
         {
             var movies = await _repositoryManager.Movie.GetMoviesAsync(movieParameters, trackChanges: false);
-//Response.Headers.Add("Access-Control-Allow-Origin", "X-Pagination");
-
+           
             Response.Headers.Add("X-Pagination",
                 JsonConvert.SerializeObject(movies.MetaData));
 
@@ -43,7 +43,7 @@ namespace UltimateMovieApp.Controllers
             return Ok(movieDto);
         }
 
-        [HttpGet("{id}",Name = "GetMovieById")]
+        [HttpGet("{id}", Name = "GetMovieById")]
         [ServiceFilter(typeof(ValidateMovieForExistFilter))]
         public IActionResult GetMovieById(Guid id)
         {
@@ -56,7 +56,7 @@ namespace UltimateMovieApp.Controllers
 
         [HttpPost]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
-        public async Task<IActionResult> CreateMovie([FromBody]MovieForCreateDto movie)
+        public async Task<IActionResult> CreateMovie([FromBody] MovieForCreateDto movie)
         {
             var movieEntity = _mapper.Map<Movie>(movie);
 
@@ -83,11 +83,11 @@ namespace UltimateMovieApp.Controllers
 
         [HttpDelete("{id}")]
         [ServiceFilter(typeof(ValidateMovieForExistFilter))]
-        public async Task<IActionResult> DeleteMovie([FromRoute]Guid id)
+        public async Task<IActionResult> DeleteMovie([FromRoute] Guid id)
         {
             var movie = HttpContext.Items["movie"] as Movie;
 
-             _repositoryManager.Movie.DeleteMovie(movie);
+            _repositoryManager.Movie.DeleteMovie(movie);
             await _repositoryManager.SaveAsync();
 
             return NoContent();

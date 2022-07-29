@@ -1,16 +1,22 @@
 using System.Text;
+
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+
+using Microsoft.IdentityModel.Tokens;
+
+using Microsoft.EntityFrameworkCore;
 
 using UltimateMovieApp.ActionFilters;
 using UltimateMovieApp.Extensions;
-using Entities.Models;
-using Constracts;
+
 using Entities;
+using Entities.Models;
+
+using Constracts;
 using Repository;
+using Microsoft.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -50,9 +56,9 @@ builder.Services.AddAuthentication(opt =>
         ValidateAudience = true,
         ValidateIssuerSigningKey = true,
 
-        ValidIssuer = configuration["JwtSettings:ValidIssuer"],
-        ValidAudience = configuration["JwtSettings:ValidAudince"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Secret"]))
+        ValidIssuer = configuration["JwtSettings:validIssuer"],
+        ValidAudience = configuration["JwtSettings:validAudience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:secret"]))
     };
 });
 
@@ -90,6 +96,8 @@ builder.Services.AddScoped<ValidateMovieForExistFilter>();
 builder.Services.AddScoped<ValidateCompanyExistAttribute>();
 
 builder.Services.AddScoped<ValidateEmplayeeForCompanyFilter>();
+
+builder.Services.AddScoped<IAuthenticationManager, AuthenticationManager>();
 
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 
