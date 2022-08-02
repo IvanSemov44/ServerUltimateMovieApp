@@ -56,7 +56,8 @@ namespace UltimateMovieApp.Controllers
             {
                 return Unauthorized();
             }
-            return Ok(new { Token = await _authenticationManager.CreateToken() });
+            var user = await _userManager.FindByNameAsync(movieUserForAuthenticationDto.Username);
+            return Ok(new { Token = await _authenticationManager.CreateToken() , id = user.Id,username = user.UserName});
         }
     }
 }

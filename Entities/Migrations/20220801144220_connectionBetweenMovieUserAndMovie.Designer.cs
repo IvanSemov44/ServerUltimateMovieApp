@@ -4,6 +4,7 @@ using Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entities.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    partial class RepositoryContextModelSnapshot : ModelSnapshot
+    [Migration("20220801144220_connectionBetweenMovieUserAndMovie")]
+    partial class connectionBetweenMovieUserAndMovie
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,9 +124,6 @@ namespace Entities.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("MovieUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("SubtitleUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -141,8 +140,6 @@ namespace Entities.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("MovieUserId");
 
                     b.ToTable("Movies");
                 });
@@ -253,15 +250,15 @@ namespace Entities.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "f30555b3-80f4-4f2b-9531-ed88dba28443",
-                            ConcurrencyStamp = "27e33cac-6398-45da-9ded-444e30b31cf5",
+                            Id = "08d0cba9-5576-4387-87a5-15e779b7e9da",
+                            ConcurrencyStamp = "dcc115b7-3c07-484b-a70e-93b77e8ef278",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "3ca51907-0d2c-41c9-92fc-b1b88de2f6a8",
-                            ConcurrencyStamp = "a4ac353a-dc58-426e-9f8c-f0974b707a7c",
+                            Id = "a85dcfab-8c10-4be1-b1ae-5b274f5a3ddd",
+                            ConcurrencyStamp = "06ef38a1-d3eb-437c-b5ff-b50e53bb3945",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });
@@ -384,13 +381,6 @@ namespace Entities.Migrations
                     b.Navigation("Company");
                 });
 
-            modelBuilder.Entity("Entities.Models.Movie", b =>
-                {
-                    b.HasOne("Entities.Models.MovieUser", null)
-                        .WithMany("Movies")
-                        .HasForeignKey("MovieUserId");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -445,11 +435,6 @@ namespace Entities.Migrations
             modelBuilder.Entity("Entities.Models.Company", b =>
                 {
                     b.Navigation("Employees");
-                });
-
-            modelBuilder.Entity("Entities.Models.MovieUser", b =>
-                {
-                    b.Navigation("Movies");
                 });
 #pragma warning restore 612, 618
         }

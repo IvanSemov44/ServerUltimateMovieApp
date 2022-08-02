@@ -6,9 +6,11 @@ namespace Entities.Models
     {
         public string FirstName { get; set; } = string.Empty;
 
-        public string LasttName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
 
         public string Favorite { get; set; } = string.Empty;
+
+        public ICollection<Movie>? Movies { get; set; } = new List<Movie>();
 
     }
 }

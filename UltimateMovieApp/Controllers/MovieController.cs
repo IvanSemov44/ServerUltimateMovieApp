@@ -30,7 +30,7 @@ namespace UltimateMovieApp.Controllers
         }
 
         [EnableCors("CorsPolicy")]
-        [HttpGet, /*Authorize(Roles = "Admin")*/]
+        [HttpGet]
         public async Task<IActionResult> GetMovies([FromQuery] MovieParameters movieParameters)
         {
             var movies = await _repositoryManager.Movie.GetMoviesAsync(movieParameters, trackChanges: false);
@@ -43,7 +43,7 @@ namespace UltimateMovieApp.Controllers
             return Ok(movieDto);
         }
 
-        [HttpGet("{id}", Name = "GetMovieById")]
+        [HttpGet("{id}"), Authorize]
         [ServiceFilter(typeof(ValidateMovieForExistFilter))]
         public IActionResult GetMovieById(Guid id)
         {
