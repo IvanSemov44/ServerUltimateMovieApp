@@ -52,9 +52,9 @@ namespace UltimateMovieApp.Controllers
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> Login([FromBody] MovieUserForAuthenticationDto movieUserForAuthenticationDto)
         {
-            if(!await _authenticationManager.ValidateUser(movieUserForAuthenticationDto))
+            if (!await _authenticationManager.ValidateUser(movieUserForAuthenticationDto))
             {
-                return Unauthorized();
+                 return Unauthorized(new { error = "Username or password don't match" });
             }
             var user = await _userManager.FindByNameAsync(movieUserForAuthenticationDto.Username);
             return Ok(new { Token = await _authenticationManager.CreateToken() , id = user.Id,username = user.UserName});
