@@ -17,6 +17,11 @@ namespace Entities
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Movie>()
+                .HasOne(m => m.MovieOwner)
+                .WithMany(u => u.Movies)
+                .HasForeignKey(m=>m.MovieOwnerId);
+
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
         }
 

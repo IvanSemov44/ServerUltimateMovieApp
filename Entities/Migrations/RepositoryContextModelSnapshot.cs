@@ -122,7 +122,8 @@ namespace Entities.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("MovieUserId")
+                    b.Property<string>("MovieOwnerId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("SubtitleUrl")
@@ -142,7 +143,7 @@ namespace Entities.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MovieUserId");
+                    b.HasIndex("MovieOwnerId");
 
                     b.ToTable("Movies");
                 });
@@ -253,15 +254,15 @@ namespace Entities.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "f30555b3-80f4-4f2b-9531-ed88dba28443",
-                            ConcurrencyStamp = "27e33cac-6398-45da-9ded-444e30b31cf5",
+                            Id = "1cba90de-4340-4ad8-8ce6-e25edb992114",
+                            ConcurrencyStamp = "bb08975e-225b-4501-a610-839b44da3441",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "3ca51907-0d2c-41c9-92fc-b1b88de2f6a8",
-                            ConcurrencyStamp = "a4ac353a-dc58-426e-9f8c-f0974b707a7c",
+                            Id = "e040f8f5-6142-4e7c-8018-36647314bbd3",
+                            ConcurrencyStamp = "5f08f254-f7d0-4445-9983-34483a82191d",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });
@@ -386,9 +387,13 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Entities.Models.Movie", b =>
                 {
-                    b.HasOne("Entities.Models.MovieUser", null)
+                    b.HasOne("Entities.Models.MovieUser", "MovieOwner")
                         .WithMany("Movies")
-                        .HasForeignKey("MovieUserId");
+                        .HasForeignKey("MovieOwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MovieOwner");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

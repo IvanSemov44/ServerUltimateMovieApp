@@ -12,6 +12,7 @@ using Entities.Models;
 using Entities.RequestFeatures;
 using Entities.DataTransferObjects.Movie;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace UltimateMovieApp.Controllers
 {
@@ -19,12 +20,13 @@ namespace UltimateMovieApp.Controllers
     [ApiController]
     public class MovieController : Controller
     {
-
+        private readonly UserManager<MovieUser> _movieUserManager;
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
 
-        public MovieController(IRepositoryManager repositoryManager, IMapper mapper)
+        public MovieController(IRepositoryManager repositoryManager, IMapper mapper,UserManager<MovieUser> movieUserManager)
         {
+            this._movieUserManager = movieUserManager;
             this._repositoryManager = repositoryManager;
             this._mapper = mapper;
         }
@@ -43,7 +45,7 @@ namespace UltimateMovieApp.Controllers
             return Ok(movieDto);
         }
 
-        [HttpGet("{id}"), Authorize]
+        [HttpGet("{id}")]
         [ServiceFilter(typeof(ValidateMovieForExistFilter))]
         public IActionResult GetMovieById(Guid id)
         {
@@ -54,10 +56,22 @@ namespace UltimateMovieApp.Controllers
             return Ok(movieDto);
         }
 
-        [HttpPost]
+        [HttpGet("myMovies/:{id}")]
+
+        public async Task<IActionResult> GetMovieByUserId(string id)
+        {
+            var user = _movieUserManager.FindByIdAsync(id);
+
+            user.M();
+
+            return Ok();
+        }
+
+        [HttpPost,Authorize]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> CreateMovie([FromBody] MovieForCreateDto movie)
         {
+
             var movieEntity = _mapper.Map<Movie>(movie);
 
             _repositoryManager.Movie.CreateMovie(movieEntity);
@@ -65,10 +79,10 @@ namespace UltimateMovieApp.Controllers
 
             var movieForReturn = _mapper.Map<MovieDto>(movieEntity);
 
-            return CreatedAtRoute("GetMovieById", new { id = movieForReturn.Id }, movieForReturn);
+            return Ok(movieForReturn.Id);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}"),Authorize]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         [ServiceFilter(typeof(ValidateMovieForExistFilter))]
         public async Task<IActionResult> UpdateMovie(Guid id, [FromBody] MovieForUpdateDto movie)
@@ -78,7 +92,10 @@ namespace UltimateMovieApp.Controllers
             _mapper.Map(movie, movieEntity);
             await _repositoryManager.SaveAsync();
 
-            return NoContent();
+            var movieForReturn = _mapper.Map<MovieDto>(movieEntity);
+
+
+            return Ok(movieForReturn.Id);
         }
 
         [HttpDelete("{id}")]
