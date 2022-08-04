@@ -24,7 +24,7 @@ namespace UltimateMovieApp.Controllers
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
 
-        public MovieController(IRepositoryManager repositoryManager, IMapper mapper,UserManager<MovieUser> movieUserManager)
+        public MovieController(IRepositoryManager repositoryManager, IMapper mapper, UserManager<MovieUser> movieUserManager)
         {
             this._movieUserManager = movieUserManager;
             this._repositoryManager = repositoryManager;
@@ -36,7 +36,7 @@ namespace UltimateMovieApp.Controllers
         public async Task<IActionResult> GetMovies([FromQuery] MovieParameters movieParameters)
         {
             var movies = await _repositoryManager.Movie.GetMoviesAsync(movieParameters, trackChanges: false);
-           
+
             Response.Headers.Add("X-Pagination",
                 JsonConvert.SerializeObject(movies.MetaData));
 
@@ -56,15 +56,16 @@ namespace UltimateMovieApp.Controllers
             return Ok(movieDto);
         }
 
-        [HttpGet("myMovies/:{id}")]
+        [Route("movies")]
+        [HttpGet,Authorize]
 
-        public async Task<IActionResult> GetMovieByUserId(string id)
+        public async Task<IActionResult> GetMoviesByMovieOwnerId()
         {
-            var user = _movieUserManager.FindByIdAsync(id);
+            var user = await _movieUserManager.FindByNameAsync(this.HttpContext?.User?.Identity?.Name);
 
-            user.M();
+           var OwnerList = await _repositoryManager.Movie.GetMoviesByMovieOwnerIdAsync(user.Id,trackChanges:false);
 
-            return Ok();
+            return Ok(OwnerList);
         }
 
         [HttpPost,Authorize]
@@ -72,9 +73,13 @@ namespace UltimateMovieApp.Controllers
         public async Task<IActionResult> CreateMovie([FromBody] MovieForCreateDto movie)
         {
 
+            var user = await _movieUserManager.FindByNameAsync(this.HttpContext?.User?.Identity?.Name);
+
             var movieEntity = _mapper.Map<Movie>(movie);
 
+            user.Movies?.Add(movieEntity);
             _repositoryManager.Movie.CreateMovie(movieEntity);
+            
             await _repositoryManager.SaveAsync();
 
             var movieForReturn = _mapper.Map<MovieDto>(movieEntity);

@@ -9,6 +9,8 @@ namespace Constracts
 
         public Task<Movie?> GetMovieByIdsAsync(Guid movieId, bool trackChange);
 
+        public Task<List<Movie?>> GetMoviesByMovieOwnerIdAsync(string movieOwnerId, bool trackChanges);
+
         public void CreateMovie(Movie movie);
 
         public void DeleteMovie(Movie movie);

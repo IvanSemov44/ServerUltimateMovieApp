@@ -31,5 +31,7 @@
         public string Category { get; set; } = string.Empty;
 
         public string Comments { get; set; } = string.Empty;
+
+        public string MovieOwnerId { get; set; } = string.Empty;
     }
 }
