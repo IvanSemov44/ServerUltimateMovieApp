@@ -2,7 +2,6 @@
 using Constracts;
 using Entities.DataTransferObjects.MovieUser;
 using Entities.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Repository;
@@ -60,6 +59,5 @@ namespace UltimateMovieApp.Controllers
             var user = await _userManager.FindByNameAsync(movieUserForAuthenticationDto.Username);
             return Ok(new { Token = await _authenticationManager.CreateToken() , id = user.Id,username = user.UserName});
         }
-         
     }
 }
